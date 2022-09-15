@@ -14,45 +14,82 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Objects;
+import java.util.UUID;
 
 public class IText7ChineseFont {
     public static void main(String[] args) throws Exception {
-
-        final File fontDir = new File(SystemUtils.getJavaIoTmpDir(), "IText7ChineseFont");
-        if (!fontDir.exists() && !fontDir.mkdirs()) {
-            throw new IllegalStateException();
-        }
-
         final InputStream is = Objects.requireNonNull(IText7ChineseFont.class.getResourceAsStream("/Template.html"));
-        final InputStream fontLight = Objects.requireNonNull(IText7ChineseFont.class.getResourceAsStream("/fonts/AlibabaPuHuiTi-2-45-Light.ttf"));
-        final InputStream fontBold = Objects.requireNonNull(IText7ChineseFont.class.getResourceAsStream("/fonts/AlibabaPuHuiTi-2-85-Bold.ttf"));
+        final String html = IOUtils.toString(is, StandardCharsets.UTF_8);
 
-        IOUtils.copy(fontLight, Files.newOutputStream(new File(fontDir, "AlibabaPuHuiTi-2-45-Light.ttf").toPath()));
-        IOUtils.copy(fontBold, Files.newOutputStream(new File(fontDir, "AlibabaPuHuiTi-2-85-Bold.ttf").toPath()));
+        html2pdf("alibaba", html, getAlibabaFontDirectory());
+
+        html2pdf("source", html, getSourceHanSansFontDirectory());
+    }
+
+
+    private static void html2pdf(String name, String html, String fontDir) throws Exception {
+
 
         final File file = File.createTempFile("itext-chinese-font-", ".pdf");
 
         final ConverterProperties properties = new ConverterProperties();
         final FontProvider fontProvider = new FontProvider();
-        fontProvider.addDirectory(fontDir.getAbsolutePath());
+        fontProvider.addDirectory(fontDir);
         properties.setFontProvider(fontProvider);
         properties.setMediaDeviceDescription(new MediaDeviceDescription(MediaType.PRINT));
 
         try (final OutputStream os = Files.newOutputStream(file.toPath());
              final PdfWriter pdfWriter = new PdfWriter(os);
              final PdfDocument pdfDocument = new PdfDocument(pdfWriter)) {
-            try (final Document doc = HtmlConverter.convertToDocument(IOUtils.toString(is, StandardCharsets.UTF_8), pdfDocument, properties)) {
+            try (final Document doc = HtmlConverter.convertToDocument(html, pdfDocument, properties)) {
                 doc.add(new AreaBreak());
             }
         }
 
-        System.out.println(file.getAbsolutePath());
+        System.out.println(name + ": " + file.getAbsolutePath());
+    }
 
-        FileUtils.deleteQuietly(fontDir);
+    private static String getAlibabaFontDirectory() throws IOException {
+        final File fontDir = new File(SystemUtils.getJavaIoTmpDir(), UUID.randomUUID().toString());
+        if (!fontDir.exists() && !fontDir.mkdirs()) {
+            throw new IllegalStateException();
+        }
+
+        System.out.println(fontDir);
+
+        final InputStream fontLight = Objects.requireNonNull(IText7ChineseFont.class.getResourceAsStream("/fonts/SourceHanSansSC-Light.otf"));
+        final InputStream fontBold = Objects.requireNonNull(IText7ChineseFont.class.getResourceAsStream("/fonts/SourceHanSansSC-Bold.otf"));
+
+        IOUtils.copy(fontLight, Files.newOutputStream(new File(fontDir, "SourceHanSansSC-Light.otf").toPath()));
+        IOUtils.copy(fontBold, Files.newOutputStream(new File(fontDir, "SourceHanSansSC-Bold.otf").toPath()));
+
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> FileUtils.deleteQuietly(fontDir)));
+
+        return fontDir.getAbsolutePath();
+    }
+
+    private static String getSourceHanSansFontDirectory() throws IOException {
+        final File fontDir = new File(SystemUtils.getJavaIoTmpDir(), UUID.randomUUID().toString());
+        if (!fontDir.exists() && !fontDir.mkdirs()) {
+            throw new IllegalStateException();
+        }
+
+        final InputStream fontLight = Objects.requireNonNull(IText7ChineseFont.class.getResourceAsStream("/fonts/AlibabaPuHuiTi-2-45-Light.ttf"));
+        final InputStream fontBold = Objects.requireNonNull(IText7ChineseFont.class.getResourceAsStream("/fonts/AlibabaPuHuiTi-2-85-Bold.ttf"));
+
+        IOUtils.copy(fontLight, Files.newOutputStream(new File(fontDir, "AlibabaPuHuiTi-2-45-Light.ttf").toPath()));
+        IOUtils.copy(fontBold, Files.newOutputStream(new File(fontDir, "AlibabaPuHuiTi-2-85-Bold.ttf").toPath()));
+
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> FileUtils.deleteQuietly(fontDir)));
+
+        return fontDir.getAbsolutePath();
     }
 }
