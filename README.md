@@ -2,6 +2,7 @@
 
 [阿里巴巴普惠体](https://fonts.alibabagroup.com/#/font)
 [思源黑体](https://github.com/adobe-fonts/source-han-sans)
+[思源宋体](https://github.com/adobe-fonts/source-han-serif)
 
 ![图片效果](./html2pdf.png)
 

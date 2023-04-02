@@ -27,9 +27,12 @@ public class IText7ChineseFont {
         final InputStream is = Objects.requireNonNull(IText7ChineseFont.class.getResourceAsStream("/Template.html"));
         final String html = IOUtils.toString(is, StandardCharsets.UTF_8);
 
+
         html2pdf("alibaba", html, getAlibabaFontDirectory());
 
-        html2pdf("source", html, getSourceHanSansFontDirectory());
+        html2pdf("source sans", html, getSourceHanSansFontDirectory());
+
+        html2pdf("source serif", html, getSourceHanSerifFontDirectory());
     }
 
 
@@ -61,13 +64,11 @@ public class IText7ChineseFont {
             throw new IllegalStateException();
         }
 
-        System.out.println(fontDir);
+        final InputStream fontLight = Objects.requireNonNull(IText7ChineseFont.class.getResourceAsStream("/fonts/AlibabaPuHuiTi-2-45-Light.ttf"));
+        final InputStream fontBold = Objects.requireNonNull(IText7ChineseFont.class.getResourceAsStream("/fonts/AlibabaPuHuiTi-2-85-Bold.ttf"));
 
-        final InputStream fontLight = Objects.requireNonNull(IText7ChineseFont.class.getResourceAsStream("/fonts/SourceHanSansSC-Light.otf"));
-        final InputStream fontBold = Objects.requireNonNull(IText7ChineseFont.class.getResourceAsStream("/fonts/SourceHanSansSC-Bold.otf"));
-
-        IOUtils.copy(fontLight, Files.newOutputStream(new File(fontDir, "SourceHanSansSC-Light.otf").toPath()));
-        IOUtils.copy(fontBold, Files.newOutputStream(new File(fontDir, "SourceHanSansSC-Bold.otf").toPath()));
+        IOUtils.copy(fontLight, Files.newOutputStream(new File(fontDir, "AlibabaPuHuiTi-2-45-Light.ttf").toPath()));
+        IOUtils.copy(fontBold, Files.newOutputStream(new File(fontDir, "AlibabaPuHuiTi-2-85-Bold.ttf").toPath()));
 
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> FileUtils.deleteQuietly(fontDir)));
@@ -81,11 +82,29 @@ public class IText7ChineseFont {
             throw new IllegalStateException();
         }
 
-        final InputStream fontLight = Objects.requireNonNull(IText7ChineseFont.class.getResourceAsStream("/fonts/AlibabaPuHuiTi-2-45-Light.ttf"));
-        final InputStream fontBold = Objects.requireNonNull(IText7ChineseFont.class.getResourceAsStream("/fonts/AlibabaPuHuiTi-2-85-Bold.ttf"));
+        final InputStream fontLight = Objects.requireNonNull(IText7ChineseFont.class.getResourceAsStream("/fonts/SourceHanSansSC-ExtraLight.otf"));
+        final InputStream fontBold = Objects.requireNonNull(IText7ChineseFont.class.getResourceAsStream("/fonts/SourceHanSansSC-Medium.otf"));
 
-        IOUtils.copy(fontLight, Files.newOutputStream(new File(fontDir, "AlibabaPuHuiTi-2-45-Light.ttf").toPath()));
-        IOUtils.copy(fontBold, Files.newOutputStream(new File(fontDir, "AlibabaPuHuiTi-2-85-Bold.ttf").toPath()));
+        IOUtils.copy(fontLight, Files.newOutputStream(new File(fontDir, "SourceHanSansSC-ExtraLight.otf").toPath()));
+        IOUtils.copy(fontBold, Files.newOutputStream(new File(fontDir, "SourceHanSansSC-Medium.otf").toPath()));
+
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> FileUtils.deleteQuietly(fontDir)));
+
+        return fontDir.getAbsolutePath();
+    }
+
+    private static String getSourceHanSerifFontDirectory() throws IOException {
+        final File fontDir = new File(SystemUtils.getJavaIoTmpDir(), UUID.randomUUID().toString());
+        if (!fontDir.exists() && !fontDir.mkdirs()) {
+            throw new IllegalStateException();
+        }
+
+        final InputStream fontLight = Objects.requireNonNull(IText7ChineseFont.class.getResourceAsStream("/fonts/SourceHanSerifSC-ExtraLight.otf"));
+        final InputStream fontBold = Objects.requireNonNull(IText7ChineseFont.class.getResourceAsStream("/fonts/SourceHanSerifSC-Medium.otf"));
+
+        IOUtils.copy(fontLight, Files.newOutputStream(new File(fontDir, "SourceHanSerifSC-ExtraLight.otf").toPath()));
+        IOUtils.copy(fontBold, Files.newOutputStream(new File(fontDir, "SourceHanSerifSC-Medium.otf").toPath()));
 
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> FileUtils.deleteQuietly(fontDir)));
